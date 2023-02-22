@@ -4,8 +4,8 @@ package main
 import (
 //line Implementation.md:157
 	"fmt"
-	"os"
 	"io"
+	"os"
 //line Implementation.md:223
 	"bufio"
 //line Implementation.md:406
@@ -22,6 +22,7 @@ type File string
 type CodeBlock []CodeLine
 type BlockName string
 type language string
+
 //line LineNumbers.md:36
 type CodeLine struct {
 	text   string
@@ -29,18 +30,24 @@ type CodeLine struct {
 	lang   language
 	number int
 }
+
 //line LineNumbers.md:30
 
 var blocks map[BlockName]CodeBlock
 var files map[File]CodeBlock
+
 //line Implementation.md:424
 var namedBlockRe *regexp.Regexp
+
 //line Implementation.md:458
 var fileBlockRe *regexp.Regexp
+
 //line Implementation.md:549
 var replaceRe *regexp.Regexp
+
 //line IndentedBlocks.md:68
 var blockStartRe *regexp.Regexp
+
 //line Implementation.md:67
 
 //line LineNumbers.md:118
@@ -73,50 +80,51 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 		}
 //line IndentedBlocks.md:118
 		if inBlock {
-		    line.text = strings.TrimPrefix(line.text, blockPrefix)
-		    if line.text == "```\n" {
+			line.text = strings.TrimPrefix(line.text, blockPrefix)
+			if line.text == "```\n" {
 //line LineNumbers.md:56
-		        inBlock = false
-		        // Update the files map if it's a file.
-		        if fname != "" {
-		        	if appending {
-		        		files[fname] = append(files[fname], block...)
-		        	} else {
-		        		files[fname] = block
-		        	}
-		        }
+				inBlock = false
+				// Update the files map if it's a file.
+				if fname != "" {
+					if appending {
+						files[fname] = append(files[fname], block...)
+					} else {
+						files[fname] = block
+					}
+				}
 
-		        // Update the named block map if it's a named block.
-		        if bname != "" {
-		        	if appending {
-		        		blocks[bname] = append(blocks[bname], block...)
-		        	} else {
-		        		blocks[bname] = block
-		        	}
-		        }
+				// Update the named block map if it's a named block.
+				if bname != "" {
+					if appending {
+						blocks[bname] = append(blocks[bname], block...)
+					} else {
+						blocks[bname] = block
+					}
+				}
 //line IndentedBlocks.md:122
-		        continue
-		    }
+				continue
+			}
 //line LineNumbers.md:48
-		    block = append(block, line)
+			block = append(block, line)
 //line IndentedBlocks.md:125
-		    continue
+			continue
 		}
 //line IndentedBlocks.md:55
 		if matches := blockStartRe.FindStringSubmatch(line.text); matches != nil {
-		    inBlock = true
-		    blockPrefix = matches[1]
-		    line.text = strings.TrimPrefix(line.text, blockPrefix)
-		    // We were outside of a block, so just blindly reset it.
-		    block = make(CodeBlock, 0)
+			inBlock = true
+			blockPrefix = matches[1]
+			line.text = strings.TrimPrefix(line.text, blockPrefix)
+			// We were outside of a block, so just blindly reset it.
+			block = make(CodeBlock, 0)
 //line LineNumbers.md:181
-		    fname, bname, appending, line.lang = parseHeader(line.text)
+			fname, bname, appending, line.lang = parseHeader(line.text)
 //line IndentedBlocks.md:62
 		}
 //line LineNumbers.md:111
 	}
 //line LineNumbers.md:121
 }
+
 //line LineNumbers.md:190
 func parseHeader(line string) (File, BlockName, bool, language) {
 	line = strings.TrimSpace(line)
@@ -131,6 +139,7 @@ func parseHeader(line string) (File, BlockName, bool, language) {
 	return "", "", false, ""
 //line LineNumbers.md:193
 }
+
 //line WhitespacePreservation.md:34
 // Replace expands all macros in a CodeBlock and returns a CodeBlock with no
 // references to macros.
@@ -161,6 +170,7 @@ func (c CodeBlock) Replace(prefix string) (ret CodeBlock) {
 	return
 //line WhitespacePreservation.md:38
 }
+
 //line LineNumbers.md:277
 
 // Finalize extract the textual lines from CodeBlocks and (if needed) prepend a
@@ -178,7 +188,7 @@ func (c CodeBlock) Finalize() (ret string) {
 				formatstring = "//line %[2]v:%[1]v\n"
 			case "C", "c", "cpp":
 				formatstring = "#line %v \"%v\"\n"
-            default:
+			default:
 				ret += l.text
 				continue
 			}
@@ -190,6 +200,7 @@ func (c CodeBlock) Finalize() (ret string) {
 	}
 	return
 }
+
 //line Implementation.md:69
 
 func main() {
