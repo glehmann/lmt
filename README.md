@@ -40,11 +40,11 @@ the GitHub frontend.)
 `lmt` is language agnostic. The below demonstration of features is written
 in (very trivial) C++ to demonstrate using other languages.
 
-### Tangling into a file.
+### Tangling into a file
 
-The markup for the code block below starts with `​```cpp hello.cpp +=`:
+The markup for the code block below starts with `​```cpp > hello.cpp`:
 
-```cpp hello.cpp +=
+```cpp > hello.cpp
 <<<copyright>>>
 <<<includes>>>
 
@@ -61,11 +61,7 @@ The header says 3 things:
    your debugger will show you the line in the original markdown source file.
    (If you don't want this effect, you can just use an unrecognized language
    name like `cxx`).
-2. `hello.cpp`: The code block will be written to the file `hello.cpp`.
-3. `+=`: The code block will be appended to the most recent code block
-   defining that file, rather than overwriting its content.  Since we haven't
-   written anything to `hello.cpp` yet, the effect is the same, but this
-   demonstrates the ability to use it.
+2. `> hello.cpp`: The code block will be written to the file `hello.cpp`.
 
 ### Output directory
 
@@ -104,50 +100,37 @@ include any syntax or other compiler errors.)
 The markup for the code block below starts with `​```cpp "body of main"`
 
 ```cpp "body of main"
-std::cout << "Hello, werld!" << std::endl;
+std::cout << "Hello, world!" << std::endl;
 ```
 
 The double quotes around `body of main` mean that the code block will be
 extracted into a macro of that name.  You can see where its value will be
 injected into hello.cpp via `<<<body of main>>>`,
-[above](#tangling-into-a-file).  Since there's no `+=` at the end of the block's
-first line of markup, this code block overwrites any existing value the macro
-might already have (but since it has no existing value, it's a wash).
+[above](#tangling-into-a-file).
 
 `lmt` uses quotation marks to differentiate between macros and file
 destinations. If a name is encased in quotes, it's a macro, if not, it's
 a file.
 
-We can later re-define a macro to overwrite it (`​```cpp "body of main"`,
-again)
-
-```cpp "body of main"
-std::cout << "Hello, world!" << std::endl;
-```
-
 `lmt` parses each file passed on the command line in order. The last
 definition of a macro will be used for all references to that macro in
-other code blocks (including blocks which preceeded it in the source.)
+other code blocks (including blocks which preceded it in the source.)
 
 ### Appending To A Macro
 
-We can use `#include`s to demonstrate `+=` on macros.  There are two includes in
-this program. The markup for the following block starts with `​```cpp
-"includes"`, which causes the (empty) value of the `includes` macro to be
-overwritten.
+There are two includes in this program. The second is appended to the first.
 
 ```cpp "includes"
 #include <iostream>
 ```
 
-The markup for the next code block, however, starts with `​```cpp "includes" +=`,
-which causes the block to be appended to the `includes` macro.
+followed by
 
-```cpp "includes" +=
+```cpp "includes"
 #include <numeric>
 ```
 
-Its value is now:
+The cpp `includes` macro value is now:
 
 ```cpp
 #include <iostream>
@@ -156,7 +139,7 @@ Its value is now:
 
 (the code block above is not being tangled).
 
-### Hidden content.
+### Hidden content
 
 The raw markdown in this file contains a comment containing a code block with a
 copyright notice.  It looks a bit like this one:
@@ -179,12 +162,11 @@ documentation.
 ```
 -->
 
-### What Tangles and What Doesn't.
+### What Tangles and What Doesn't
 
-We can tangle into a random data file (`​```csv data.csv`)
+We can tangle into a random data file (`​```csv > data.csv`)
 
-
-```csv data.csv
+```csv > data.csv
 foo, bar, baz,
 qix, qux, quux,
 ```
@@ -192,50 +174,21 @@ qix, qux, quux,
 You need to specify both a language and a destination (macro or file) if
 you want the code block tangled:
 
-No language (`​``` bar.txt`—note the space):
-
-``` bar.txt
-This doesn't get tangled anywhere
-```
-
 No destination, but includes syntax highlighting (`​```cpp`)
 
 ```cpp
-auto x = "nor does this";
+auto x = "This doesn't get tangled anywhere";
 ```
 
-But any language string and filename  (`​```arbitrary foo.txt`) will do
+But any language string and filename  (`​```arbitrary > foo.txt`) will do
 
-```arbitrary foo.txt
+```arbitrary > foo.txt
 This gets tangled
 into foo.txt.
 ```
 
-Running `lmt` on this file at this point should generate the files `data.csv`,
-`foo.txt`, and `hello.cpp` with the expected contents and produce no warnings.
-
-## Building lmt from source
-
-While the tangled source of `lmt` is included for bootstrapping purposes,
-the markdown is considered the canonical version. The Go source can
-be re-extracted with:
-
-```shell
-lmt Implementation.md WhitespacePreservation.md SubdirectoryFiles.md LineNumbers.md IndentedBlocks.md
-```
-
-If you'd like to read the source, the order of the files and patches were
-written is the same as passed on the command line.
-
- 1. [Basic Implementation](Implementation.md)
- 2. [Whitespace Preservation](WhitespacePreservation.md)
- 3. [Subdirectory Files](SubdirectoryFiles.md)
- 4. [Line Numbers](LineNumbers.md)
- 5. [Indented Blocks](IndentedBlocks.md)
-
-Small bug fixes can be contributed by modifying the prose and code in
-the existing files. Larger features can be included as a patch in a
-new file.
+Running `lmt` on this file at this point should generate the files `data.csv`
+and `foo.txt` with the expected contents and produce no warnings.
 
 ## Credits
 

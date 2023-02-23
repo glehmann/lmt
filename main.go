@@ -1,18 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
 	"os"
-
-	"bufio"
-
-	"regexp"
-
-	"strings"
-
 	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 type File string
@@ -47,7 +43,7 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 	var line CodeLine
 	line.file = File(inputfilename)
 
-	var inBlock, appending bool
+	var inBlock bool
 	var bname BlockName
 	var fname File
 	var block CodeBlock
@@ -73,20 +69,12 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 				inBlock = false
 				// Update the files map if it's a file.
 				if fname != "" {
-					if appending {
-						files[fname] = append(files[fname], block...)
-					} else {
-						files[fname] = block
-					}
+					files[fname] = append(files[fname], block...)
 				}
 
 				// Update the named block map if it's a named block.
 				if bname != "" {
-					if appending {
-						blocks[bname] = append(blocks[bname], block...)
-					} else {
-						blocks[bname] = block
-					}
+					blocks[bname] = append(blocks[bname], block...)
 				}
 
 				continue
@@ -104,7 +92,7 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 			// We were outside of a block, so just blindly reset it.
 			block = make(CodeBlock, 0)
 
-			fname, bname, appending, line.lang = parseHeader(line.text)
+			fname, bname, line.lang = parseHeader(line.text)
 
 		}
 
@@ -112,17 +100,17 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 
 }
 
-func parseHeader(line string) (File, BlockName, bool, language) {
+func parseHeader(line string) (File, BlockName, language) {
 	line = strings.TrimSpace(line)
 
 	var matches []string
 	if matches = namedBlockRe.FindStringSubmatch(line); matches != nil {
-		return "", BlockName(matches[2]), (matches[3] == "+="), language(matches[1])
+		return "", BlockName(matches[2]), language(matches[1])
 	}
 	if matches = fileBlockRe.FindStringSubmatch(line); matches != nil {
-		return File(matches[2]), "", (matches[3] == "+="), language(matches[1])
+		return File(matches[2]), "", language(matches[1])
 	}
-	return "", "", false, ""
+	return "", "", ""
 
 }
 
@@ -190,9 +178,9 @@ func main() {
 	blocks = make(map[BlockName]CodeBlock)
 	files = make(map[File]CodeBlock)
 
-	namedBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]*)\\s*\"(.+)\"\\s*([+][=])?$")
+	namedBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]*)\\s*\"(.+)\"$")
 
-	fileBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]+)\\s+([\\w\\.\\-\\/]+)\\s*([+][=])?$")
+	fileBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]+)\\s+>\\s+([\\w\\.\\-\\/]+)$")
 
 	replaceRe = regexp.MustCompile(`^([\s]*)<<<(.+)>>>[\s]*$`)
 
