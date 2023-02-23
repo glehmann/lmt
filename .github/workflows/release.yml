@@ -35,3 +35,4 @@ jobs:
         goarch: ${{ matrix.goarch }}
         compress_assets: OFF
         release_name: ${{ github.ref_name }}
+        asset_name: mlp-${{ matrix.goos }}-${{ matrix.goarch }}
