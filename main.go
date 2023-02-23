@@ -93,6 +93,9 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 			block = make(CodeBlock, 0)
 
 			fname, bname, line.lang = parseHeader(line.text)
+			if string(fname) == "" && string(bname) == "" && string(line.lang) != "" {
+				fname = File(string(line.file) + "." + string(line.lang))
+			}
 
 		}
 
@@ -180,7 +183,7 @@ func main() {
 
 	namedBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]*)\\s*\"(.+)\"$")
 
-	fileBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]+)\\s+>\\s+([\\w\\.\\-\\/]+)$")
+	fileBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]+)\\s+>\\s*([\\w\\.\\-\\/]*)$")
 
 	replaceRe = regexp.MustCompile(`^([\s]*)<<<(.+)>>>[\s]*$`)
 
