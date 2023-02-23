@@ -64,7 +64,7 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 
 		if inBlock {
 			line.text = strings.TrimPrefix(line.text, blockPrefix)
-			if line.text == "```\n" {
+			if line.text == "```\n" || line.text == "~~~\n" {
 
 				inBlock = false
 				// Update the files map if it's a file.
@@ -181,13 +181,13 @@ func main() {
 	blocks = make(map[BlockName]CodeBlock)
 	files = make(map[File]CodeBlock)
 
-	namedBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]*)\\s*\"(.+)\"$")
+	namedBlockRe = regexp.MustCompile("^(?:```|~~~)\\s?([\\w\\+]*)\\s*\"(.+)\"$")
 
-	fileBlockRe = regexp.MustCompile("^`{3,}\\s?([\\w\\+]+)\\s+>\\s*([\\w\\.\\-\\/]*)$")
+	fileBlockRe = regexp.MustCompile("^(?:```|~~~)\\s?([\\w\\+]+)\\s+>\\s*([\\w\\.\\-\\/]*)$")
 
 	replaceRe = regexp.MustCompile(`^([\s]*)<<<(.+)>>>[\s]*$`)
 
-	blockStartRe = regexp.MustCompile("^([\\s]*)```")
+	blockStartRe = regexp.MustCompile("^([\\s]*)(?:```|~~~)")
 
 	outdir := flag.String("o", ".", "Output directory. If not specified, output is written to the current directory.")
 	flag.Parse()

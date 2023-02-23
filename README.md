@@ -80,10 +80,10 @@ When no name is specified after the `>` in the block code, lmt uses the
 input file name with the language as extension to generate the output file.
 For example `​```py >`
 
-```py >
+~~~py >
 def foo():
     print("foo")
-```
+~~~
 
 generates a file `README.md.py`. This is especially convenient when the
 document is used to generate a test that checks the validity of the code
