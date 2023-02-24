@@ -159,8 +159,10 @@ func (c CodeBlock) Finalize() (ret string) {
 	for _, l := range c {
 		if linenumber+1 != l.number || file != l.file {
 			switch l.lang {
-			case "go", "golang":
+			case "go", "golang", "ts", "js":
 				formatstring = "//line %[2]v:%[1]v\n"
+			case "py":
+				formatstring = "#line %[2]v:%[1]v\n"
 			case "C", "c", "cpp":
 				formatstring = "#line %v \"%v\"\n"
 			default:

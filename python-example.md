@@ -26,7 +26,7 @@ match = re.search(r'^`{3,}\s?([\w\+]+)\s+>\s*([\w\.\-\/]*)$', '``` csv > data.cs
 check that the result is as expected, but don't show that to the end reader
 
 ~~~py >
-assert(match is not None)
+assert match is not None
 ~~~
 -->
 
