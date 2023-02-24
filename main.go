@@ -47,6 +47,7 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 	var bname BlockName
 	var fname File
 	var block CodeBlock
+	var blockDelimiter string
 
 	var blockPrefix string
 
@@ -64,7 +65,7 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 
 		if inBlock {
 			line.text = strings.TrimPrefix(line.text, blockPrefix)
-			if line.text == "```\n" || line.text == "~~~\n" {
+			if line.text == blockDelimiter+"\n" {
 
 				inBlock = false
 				// Update the files map if it's a file.
@@ -92,7 +93,7 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 			// We were outside of a block, so just blindly reset it.
 			block = make(CodeBlock, 0)
 
-			fname, bname, line.lang = parseHeader(line.text)
+			fname, bname, line.lang, blockDelimiter = parseHeader(line.text)
 			if string(fname) == "" && string(bname) == "" && string(line.lang) != "" {
 				fname = File(string(line.file) + "." + string(line.lang))
 			}
@@ -103,17 +104,17 @@ func ProcessFile(r io.Reader, inputfilename string) error {
 
 }
 
-func parseHeader(line string) (File, BlockName, language) {
+func parseHeader(line string) (File, BlockName, language, string) {
 	line = strings.TrimSpace(line)
 
 	var matches []string
 	if matches = namedBlockRe.FindStringSubmatch(line); matches != nil {
-		return "", BlockName(matches[2]), language(matches[1])
+		return "", BlockName(matches[3]), language(matches[2]), matches[1]
 	}
 	if matches = fileBlockRe.FindStringSubmatch(line); matches != nil {
-		return File(matches[2]), "", language(matches[1])
+		return File(matches[3]), "", language(matches[2]), matches[1]
 	}
-	return "", "", ""
+	return "", "", "", ""
 
 }
 
@@ -181,9 +182,9 @@ func main() {
 	blocks = make(map[BlockName]CodeBlock)
 	files = make(map[File]CodeBlock)
 
-	namedBlockRe = regexp.MustCompile("^(?:```|~~~)\\s?([\\w\\+]*)\\s*\"(.+)\"$")
+	namedBlockRe = regexp.MustCompile("^(```|~~~)\\s?([\\w\\+]*)\\s*\"(.+)\"$")
 
-	fileBlockRe = regexp.MustCompile("^(?:```|~~~)\\s?([\\w\\+]+)\\s+>\\s*([\\w\\.\\-\\/]*)$")
+	fileBlockRe = regexp.MustCompile("^(```|~~~)\\s?([\\w\\+]+)\\s+>\\s*([\\w\\.\\-\\/]*)$")
 
 	replaceRe = regexp.MustCompile(`^([\s]*)<<<(.+)>>>[\s]*$`)
 
