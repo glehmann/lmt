@@ -213,7 +213,7 @@ func main() {
 	for filename, codeblock := range files {
 		fullpath := filepath.Join(*outdir, string(filename))
 		if dir := filepath.Dir(fullpath); dir != "." {
-			if err := os.MkdirAll(dir, 0775); err != nil {
+			if err := os.MkdirAll(dir, 0644); err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 			}
 		}
