@@ -186,7 +186,7 @@ func main() {
 
 	namedBlockRe = regexp.MustCompile("^(```|~~~)\\s?([\\w\\+]*)\\s*\"(.+)\"$")
 
-	fileBlockRe = regexp.MustCompile("^(```|~~~)\\s?([\\w\\+]+)\\s+>\\s*([\\w\\.\\-\\/]*)$")
+	fileBlockRe = regexp.MustCompile("^(```|~~~)\\s?([\\w\\+]+)(?:\\s+[^>]+|)\\s+>\\s*([\\w\\.\\-\\/]*)$")
 
 	replaceRe = regexp.MustCompile(`^([\s]*)<<<(.+)>>>[\s]*$`)
 
